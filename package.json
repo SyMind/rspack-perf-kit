@@ -1,0 +1,50 @@
+{
+  "name": "rspack-perf-kit",
+  "version": "0.1.0",
+  "description": "Measure Rspack builds and browser startup, trace imports, and compare optimization experiments.",
+  "type": "module",
+  "bin": {
+    "rspack-perf-kit": "./bin/rspack-perf-kit.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/plugin.d.mts",
+      "default": "./lib/plugin.mjs"
+    }
+  },
+  "files": [
+    "bin",
+    "lib",
+    "NOTICE",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:browser": "node --test test/browser.e2e.mjs",
+    "demo:baseline": "node example/build.mjs eager && node bin/rspack-perf-kit.mjs scan --dist example/dist --pin --coverage --feature page --label eager",
+    "demo:compare": "node example/build.mjs lazy && node bin/rspack-perf-kit.mjs scan --dist example/dist --parity --coverage --feature page --label lazy && node bin/rspack-perf-kit.mjs graph-diff --dist example/dist"
+  },
+  "dependencies": {
+    "@rolldown/perf-kit": "0.1.0"
+  },
+  "peerDependencies": {
+    "@rspack/core": "^2.3.2"
+  },
+  "peerDependenciesMeta": {
+    "@rspack/core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@rspack/core": "2.3.2",
+    "highlight.js": "11.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SyMind/rspack-perf-kit.git"
+  },
+  "license": "MIT"
+}

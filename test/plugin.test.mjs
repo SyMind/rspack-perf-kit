@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+import { compareGraphs, explain, whatIf } from '../lib/graph.mjs';
+import { loadGraph, targetFor } from '../lib/state.mjs';
+
+const build = fileURLToPath(new URL('../example/build.mjs', import.meta.url));
+test('production Rspack graph survives scope hoisting and follows dynamic import blocks', (t) => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rspack-graph-test-'));
+  t.after(() => fs.rmSync(tmp, { recursive: true, force: true }));
+  const dist = path.join(tmp, 'dist');
+  execFileSync(process.execPath, [build, 'eager', dist]);
+  const target = targetFor(dist);
+  const eager = loadGraph(target);
+  const candidate = './src/highlight.js';
+  const cut = whatIf(eager, candidate);
+  assert.ok(cut.removedModules > 1);
+  assert.equal(explain(eager, candidate).chain.at(-1).via, 'static');
+  execFileSync(process.execPath, [build, 'lazy', dist]);
+  const lazy = loadGraph(target);
+  assert.equal(explain(lazy, candidate).chain.at(-1).via, 'async');
+  assert.equal(whatIf(lazy, candidate).removedModules, 0);
+  const diff = compareGraphs(eager, lazy);
+  const removed = new Set(diff.left.map((row) => row.id));
+  assert.ok(cut.removed.every((row) => removed.has(row.id)));
+  assert.ok(diff.initialAssetBytesDelta < 0);
+  fs.appendFileSync(path.join(dist, 'index.html'), '<!-- rebuilt without the plugin -->');
+  assert.throws(() => loadGraph(target), /does not match/);
+});

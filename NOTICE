@@ -1,0 +1,11 @@
+rspack-perf-kit is based on the design of Rolldown's perf-kit:
+https://github.com/rolldown/rolldown/tree/main/packages/perf-kit
+
+Browser measurements, coverage, CPU attribution and visual parity use the
+@rolldown/perf-kit npm package (0.1.0). Credit for that implementation and
+the measurement workflow belongs to the Rolldown contributors.
+Copyright (c) 2024-present VoidZero Inc. & Contributors. MIT license:
+https://github.com/rolldown/rolldown/blob/main/LICENSE
+
+The Rspack compiler plugin, graph analysis, build runner and CLI integration
+are maintained independently by this project.
